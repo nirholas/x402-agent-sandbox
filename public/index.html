@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>x402 Agent Sandbox — the fake town</title>
+<style>
+  :root {
+    --accent: #0052ff;
+    --bg: #ffffff; --fg: #0b0e14; --muted: #5a6270; --card: #f5f7fa; --border: #e3e7ee;
+    --code-bg: #0b0e14; --code-fg: #e6e9f0; --ok: #1a7f4b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b0e14; --fg: #e6e9f0; --muted: #98a1b3; --card: #141a26; --border: #232b3b;
+            --code-bg: #05070c; --code-fg: #dfe4ee; --ok: #4ade80; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--fg); line-height: 1.6; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px 80px; }
+  header { padding: 56px 0 28px; text-align: center; }
+  .badge { display: inline-block; font-size: 13px; font-weight: 600; color: var(--accent);
+           border: 1px solid var(--accent); border-radius: 999px; padding: 2px 12px; margin-bottom: 16px; }
+  h1 { font-size: clamp(28px, 6vw, 40px); margin: 0 0 10px; letter-spacing: -0.02em; }
+  .tag { color: var(--muted); font-size: 17px; max-width: 660px; margin: 0 auto; }
+  h2 { font-size: 21px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+  .shop { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .shop h3 { margin: 0 0 2px; font-size: 17px; }
+  .shop .mirror { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 3px; text-transform: uppercase; letter-spacing: .04em; }
+  input, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+                  background: var(--bg); color: var(--fg); font: inherit; font-size: 14px; }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+  button[data-x402-endpoint] {
+    margin-top: 16px; width: 100%; background: var(--accent); color: #fff; border: 0; border-radius: 10px;
+    padding: 11px 16px; font: inherit; font-weight: 700; font-size: 15px; cursor: pointer;
+  }
+  button[data-x402-endpoint]:hover { filter: brightness(1.1); }
+  .price { color: var(--accent); font-weight: 700; }
+  pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 16px;
+        overflow-x: auto; font-size: 12.5px; font-family: ui-monospace, Menlo, Consolas, monospace; line-height: 1.5; }
+  #result { margin-top: 26px; }
+  #result:empty { display: none; }
+  .receipt { color: var(--ok); font-weight: 600; font-size: 14px; margin: 0 0 8px; }
+  .note { color: var(--muted); font-size: 14px; }
+  .note code { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; font-size: 12.5px; }
+  section { padding: 30px 0; border-top: 1px solid var(--border); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">x402 · USDC on Base + Solana · testnet sandbox</span>
+    <h1>The fake town</h1>
+    <p class="tag">Three sandbox merchants that speak the x402 suite's exact response contracts. Buy something for $0.001 and watch a real 402 → pay → 200 round trip end with the signed artifact in your hands.</p>
+  </header>
+
+  <section>
+    <h2>Human checkout</h2>
+    <p class="sub">Each button opens the drop-in payment modal. Connect Phantom to pay on Solana, or an EVM wallet to pay on Base — the 402 offers both, and the modal picks up whichever you have.</p>
+
+    <div class="grid">
+      <div class="shop">
+        <h3>Chez Sandbox</h3>
+        <p class="mirror">restaurant · mirrors <a href="https://github.com/nirholas/x402-tablebook">x402-tablebook</a></p>
+        <div class="row">
+          <div><label for="r-date">Date</label><input id="r-date" type="date"></div>
+          <div><label for="r-time">Time</label>
+            <select id="r-time">
+              <option>18:00</option><option selected>19:00</option><option>20:00</option><option>21:00</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div><label for="r-party">Party</label><input id="r-party" type="number" min="1" max="8" value="2"></div>
+          <div><label for="r-name">Name</label><input id="r-name" value="Ada Lovelace"></div>
+        </div>
+        <button
+          data-x402-endpoint="/restaurant/book"
+          data-x402-method="POST"
+          data-x402-merchant="Chez Sandbox"
+          data-x402-action="Book a table"
+          id="btn-restaurant">Pay <span class="price">$0.001</span> &amp; book</button>
+      </div>
+
+      <div class="shop">
+        <h3>The Sandbox Inn</h3>
+        <p class="mirror">hotel · mirrors the suite lodging contract</p>
+        <div class="row">
+          <div><label for="h-in">Check in</label><input id="h-in" type="date"></div>
+          <div><label for="h-out">Check out</label><input id="h-out" type="date"></div>
+        </div>
+        <div class="row">
+          <div><label for="h-guests">Guests</label><input id="h-guests" type="number" min="1" max="4" value="2"></div>
+          <div><label for="h-name">Name</label><input id="h-name" value="Ada Lovelace"></div>
+        </div>
+        <button
+          data-x402-endpoint="/hotel/book"
+          data-x402-method="POST"
+          data-x402-merchant="The Sandbox Inn"
+          data-x402-action="Book a room"
+          id="btn-hotel">Pay <span class="price">$0.001</span> &amp; book</button>
+      </div>
+
+      <div class="shop">
+        <h3>Sandbox Supply Co.</h3>
+        <p class="mirror">store · mirrors <a href="https://github.com/nirholas/x402-storefront">x402-storefront</a></p>
+        <label for="s-sku">Item</label>
+        <select id="s-sku"></select>
+        <div class="row">
+          <div><label for="s-name">Ship to</label><input id="s-name" value="Ada Lovelace"></div>
+          <div><label for="s-country">Country</label><input id="s-country" value="US"></div>
+        </div>
+        <button
+          data-x402-endpoint="/store/buy"
+          data-x402-method="POST"
+          data-x402-merchant="Sandbox Supply Co."
+          data-x402-action="Buy"
+          id="btn-store">Pay <span class="price">$0.001</span> &amp; buy</button>
+      </div>
+    </div>
+
+    <div id="result"></div>
+  </section>
+
+  <section>
+    <h2>What just happened</h2>
+    <p class="note">The button hit a paid route with no payment. The server answered <code>402</code> with an <code>accepts</code> array holding <strong>both rails</strong> — USDC on Base and USDC on Solana. The modal read that challenge, had your wallet sign the matching payment, and retried with <code>X-PAYMENT</code>. The facilitator verified and settled, and the signed confirmation came back in the <code>200</code> body with the receipt in <code>X-PAYMENT-RESPONSE</code>. Nothing was reserved, shipped, or charged beyond the micropayment.</p>
+    <p class="note">The modal also remembers you via SIWX (sign-in-with-X) so a second purchase skips the wallet prompt, and it enforces spending caps client-side. It is a proprietary npm package loaded here from the CDN — see <a href="https://www.npmjs.com/package/@three-ws/x402-payment-modal">@three-ws/x402-payment-modal</a>.</p>
+    <p class="note">Agents skip the modal entirely: <code>GET /town</code> for the directory, then pay with <code>x402-fetch</code> or any x402 client. See <a href="https://github.com/nirholas/x402-agent-sandbox/blob/main/skill.md">skill.md</a> and <a href="/.well-known/x402">/.well-known/x402</a>.</p>
+  </section>
+</div>
+
+<script type="module" src="https://unpkg.com/@three-ws/x402-payment-modal"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const soon = new Date(Date.now() + 7 * 86400000);
+  $("r-date").value = iso(soon);
+  $("h-in").value = iso(soon);
+  $("h-out").value = iso(new Date(soon.getTime() + 2 * 86400000));
+
+  // Populate the store picker from the free catalog.
+  fetch("/store/catalog")
+    .then((r) => r.json())
+    .then((c) => {
+      $("s-sku").innerHTML = c.items
+        .map((i) => `<option value="${i.sku}">${i.name} — ${i.type}</option>`)
+        .join("");
+    })
+    .catch(() => { $("s-sku").innerHTML = '<option value="sandbox-guide">Sandbox guide</option>'; });
+
+  // The modal sends whatever body we attach to the button before it opens.
+  const bodies = {
+    "btn-restaurant": () => ({
+      date: $("r-date").value, time: $("r-time").value,
+      party: Number($("r-party").value), name: $("r-name").value,
+    }),
+    "btn-hotel": () => ({
+      checkIn: $("h-in").value, checkOut: $("h-out").value,
+      guests: Number($("h-guests").value), name: $("h-name").value,
+    }),
+    "btn-store": () => ({
+      sku: $("s-sku").value, name: $("s-name").value,
+      address: "1 Testnet Row", country: $("s-country").value,
+    }),
+  };
+  for (const [id, build] of Object.entries(bodies)) {
+    $(id).addEventListener("click", (e) => {
+      e.currentTarget.dataset.x402Body = JSON.stringify(build());
+    }, true);
+  }
+
+  const esc = (s) => s.replace(/[<&]/g, (c) => ({ "<": "&lt;", "&": "&amp;" })[c]);
+
+  // detail is { ok, result, payment, response } — `result` is the parsed 200 body
+  // (the artifact) and `payment` is the decoded settlement receipt.
+  addEventListener("x402:result", (e) => {
+    const { result, payment, response } = e.detail || {};
+    const artifact = result ?? response ?? e.detail;
+    const rail = payment?.network || payment?.rail || "chain";
+    const tx = payment?.transaction ? ` · tx ${String(payment.transaction).slice(0, 12)}…` : "";
+    $("result").innerHTML =
+      `<p class="receipt">✓ Settled on ${esc(String(rail))}${esc(tx)} — here is the artifact, straight out of the 200 body:</p>` +
+      `<pre>${esc(JSON.stringify(artifact, null, 2))}</pre>`;
+    $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  addEventListener("x402:error", (e) => {
+    const msg = (e.detail && (e.detail.error || e.detail.message)) || "unknown error";
+    $("result").innerHTML = `<p class="receipt" style="color:#c33">Payment did not complete: ${esc(String(msg))}</p>`;
+  });
+</script>
+</body>
+</html>

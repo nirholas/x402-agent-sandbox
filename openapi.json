@@ -1,0 +1,1222 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "x402-agent-sandbox",
+    "version": "0.1.0",
+    "description": "A fake town on testnet — mock restaurant, hotel, and store implementing the x402 suite's exact contracts, for end-to-end agent purchase testing.  Dual-rail: pay in USDC on Base (EVM) or USDC on Solana — your client picks the rail from the `accepts` array.",
+    "contact": {
+      "name": "nirholas",
+      "email": "nichxbt@gmail.com"
+    },
+    "license": {
+      "name": "Apache-2.0",
+      "identifier": "Apache-2.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4021",
+      "description": "local sandbox"
+    }
+  ],
+  "paths": {
+    "/town": {
+      "get": {
+        "summary": "Merchant directory (free)",
+        "operationId": "getTown",
+        "responses": {
+          "200": {
+            "description": "Directory of sandbox merchants, routes, prices, and payment rails",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurant/availability": {
+      "get": {
+        "summary": "Open reservation slots (free here, $0.001 at the real merchant)",
+        "operationId": "restaurantAvailability",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "party",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Slot list in the x402-tablebook /availability schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurant/book": {
+      "post": {
+        "summary": "Book a table — $0.001",
+        "operationId": "restaurantBook",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "time": {
+                    "type": "string",
+                    "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                  },
+                  "party": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 8
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "date",
+                  "time",
+                  "party",
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Signed reservation confirmation (x402-tablebook schema)",
+            "headers": {
+              "X-PAYMENT-RESPONSE": {
+                "description": "base64 JSON settlement receipt: {success, rail, network, transaction, payer}",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "reservationId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "const": "confirmed"
+                    },
+                    "restaurant": {
+                      "type": "string"
+                    },
+                    "confirmedTime": {
+                      "type": "string"
+                    },
+                    "party": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "table": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "seats": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "refundTerms": {
+                      "type": "object",
+                      "properties": {
+                        "holdPrice": {
+                          "type": "string"
+                        },
+                        "freeCancellationHours": {
+                          "type": "integer"
+                        },
+                        "description": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "cancelToken": {
+                      "type": "string"
+                    },
+                    "cancelEndpoint": {
+                      "type": "string"
+                    },
+                    "ledgerEntry": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "hold",
+                            "refund",
+                            "forfeit"
+                          ]
+                        },
+                        "amount": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "ics": {
+                      "type": "string",
+                      "description": "base64 RFC 5545 calendar invite"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "sandbox": {
+                      "type": "object"
+                    },
+                    "signature": {
+                      "type": "string",
+                      "description": "hex HMAC-SHA256 over the canonical confirmation"
+                    }
+                  },
+                  "required": [
+                    "reservationId",
+                    "status",
+                    "confirmedTime",
+                    "party",
+                    "table",
+                    "refundTerms",
+                    "cancelToken",
+                    "ics",
+                    "signature"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid booking request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — pay in USDC on Base or Solana",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequirements"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "OUTSIDE_HOURS or NO_TABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurant/cancel/{id}": {
+      "post": {
+        "summary": "Cancel a reservation (free, auth by cancelToken)",
+        "operationId": "restaurantCancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cancelToken": {
+                    "type": "string"
+                  },
+                  "confirmedTime": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "cancelToken"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed cancellation record + refund ledger entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "BAD_CANCEL_TOKEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_CANCELLED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hotel/search": {
+      "get": {
+        "summary": "Room offers (free here, $0.005 at the real merchant)",
+        "operationId": "hotelSearch",
+        "parameters": [
+          {
+            "name": "checkIn",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "checkOut",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "guests",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offers in the x402-hotel-search /search schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hotel/book": {
+      "post": {
+        "summary": "Book a room — $0.001",
+        "operationId": "hotelBook",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "checkIn": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "checkOut": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "guests": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "roomType": {
+                    "type": "string",
+                    "enum": [
+                      "STANDARD_KING",
+                      "STANDARD_TWIN",
+                      "DELUXE_KING",
+                      "SUITE"
+                    ]
+                  }
+                },
+                "required": [
+                  "checkIn",
+                  "checkOut",
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Signed lodging confirmation",
+            "headers": {
+              "X-PAYMENT-RESPONSE": {
+                "description": "base64 JSON settlement receipt: {success, rail, network, transaction, payer}",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "bookingId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "const": "confirmed"
+                    },
+                    "hotel": {
+                      "type": "string"
+                    },
+                    "hotelId": {
+                      "type": "string"
+                    },
+                    "stay": {
+                      "type": "object",
+                      "properties": {
+                        "checkIn": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "checkOut": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "nights": {
+                          "type": "integer"
+                        },
+                        "checkInTime": {
+                          "type": "string"
+                        },
+                        "checkOutTime": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "guests": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "room": {
+                      "type": "object",
+                      "properties": {
+                        "roomType": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "beds": {
+                          "type": "integer"
+                        },
+                        "maxOccupancy": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "price": {
+                      "type": "object",
+                      "properties": {
+                        "nightly": {
+                          "type": "string"
+                        },
+                        "total": {
+                          "type": "string"
+                        },
+                        "currency": {
+                          "type": "string"
+                        },
+                        "nights": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "refundTerms": {
+                      "type": "object"
+                    },
+                    "cancelToken": {
+                      "type": "string"
+                    },
+                    "cancelEndpoint": {
+                      "type": "string"
+                    },
+                    "ledgerEntry": {
+                      "type": "object"
+                    },
+                    "ics": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "sandbox": {
+                      "type": "object"
+                    },
+                    "signature": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "bookingId",
+                    "status",
+                    "stay",
+                    "room",
+                    "price",
+                    "cancelToken",
+                    "ics",
+                    "signature"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid booking request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — pay in USDC on Base or Solana",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequirements"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "NO_ROOM",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hotel/cancel/{id}": {
+      "post": {
+        "summary": "Cancel a booking (free, auth by cancelToken)",
+        "operationId": "hotelCancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cancelToken": {
+                    "type": "string"
+                  },
+                  "checkIn": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                "required": [
+                  "cancelToken"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed cancellation record + refund ledger entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "BAD_CANCEL_TOKEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_CANCELLED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/store/catalog": {
+      "get": {
+        "summary": "Store catalog (free)",
+        "operationId": "storeCatalog",
+        "responses": {
+          "200": {
+            "description": "Items in the x402-storefront /catalog schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/store/buy": {
+      "post": {
+        "summary": "Buy an item — $0.001",
+        "operationId": "storeBuy",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string",
+                    "enum": [
+                      "sandbox-guide",
+                      "sandbox-dataset",
+                      "sandbox-stickers",
+                      "sandbox-mug"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Signed artifact (x402-storefront envelope): digital download URL + license, or order confirmation + fulfillment record",
+            "headers": {
+              "X-PAYMENT-RESPONSE": {
+                "description": "base64 JSON settlement receipt: {success, rail, network, transaction, payer}",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "payload": {
+                      "type": "object",
+                      "properties": {
+                        "orderId": {
+                          "type": "string"
+                        },
+                        "sku": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "digital",
+                            "physical"
+                          ]
+                        },
+                        "downloadUrl": {
+                          "type": "string",
+                          "description": "digital only — redeem free at GET /store/download/:token"
+                        },
+                        "downloadExpiresAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "contentType": {
+                          "type": "string"
+                        },
+                        "contentSha256": {
+                          "type": "string"
+                        },
+                        "license": {
+                          "type": "string"
+                        },
+                        "fulfillment": {
+                          "type": "object",
+                          "description": "physical only",
+                          "properties": {
+                            "status": {
+                              "type": "string"
+                            },
+                            "promise": {
+                              "type": "string"
+                            },
+                            "shipTo": {
+                              "type": "object"
+                            },
+                            "weightGrams": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "supportEmail": {
+                          "type": "string"
+                        },
+                        "purchasedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "sandbox": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "orderId",
+                        "sku",
+                        "kind",
+                        "purchasedAt"
+                      ]
+                    },
+                    "signature": {
+                      "type": "string"
+                    },
+                    "algorithm": {
+                      "type": "string",
+                      "const": "HMAC-SHA256"
+                    },
+                    "canonicalization": {
+                      "type": "string",
+                      "const": "sorted-keys-json"
+                    }
+                  },
+                  "required": [
+                    "payload",
+                    "signature",
+                    "algorithm",
+                    "canonicalization"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "INVALID_SKU",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required — pay in USDC on Base or Solana",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequirements"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "UNKNOWN_SKU",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "UNSUPPORTED_COUNTRY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/store/download/{token}": {
+      "get": {
+        "summary": "Redeem a digital purchase (free)",
+        "operationId": "storeDownload",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The asset bytes, with the item's Content-Type",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "BAD_TOKEN or TOKEN_EXPIRED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify": {
+      "post": {
+        "summary": "Verify a signed artifact (free)",
+        "operationId": "verifyArtifact",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "payload": {
+                    "type": "object"
+                  },
+                  "signature": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "payload",
+                  "signature"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "canonical": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "INVALID_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Liveness (free)",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "service": {
+                      "type": "string"
+                    },
+                    "rails": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/x402": {
+      "get": {
+        "summary": "Discovery manifest (free)",
+        "operationId": "manifest",
+        "responses": {
+          "200": {
+            "description": "x402 discovery manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "PaymentRequirements": {
+        "type": "object",
+        "description": "x402 payment requirements returned with HTTP 402. `accepts` always lists both rails (USDC on Base and USDC on Solana); the client settles whichever one it can and retries with an X-PAYMENT header.",
+        "properties": {
+          "x402Version": {
+            "type": "integer",
+            "example": 1
+          },
+          "error": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "mimeType": {
+                "type": "string"
+              }
+            }
+          },
+          "accepts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentRequirement"
+            }
+          }
+        },
+        "required": [
+          "x402Version",
+          "accepts"
+        ],
+        "example": {
+          "x402Version": 1,
+          "error": "Payment required — pay in USDC on Base or Solana; your client picks the rail.",
+          "accepts": [
+            {
+              "scheme": "exact",
+              "network": "base-sepolia",
+              "maxAmountRequired": "1000",
+              "resource": "http://localhost:4021/example",
+              "description": "Example paid resource",
+              "mimeType": "application/json",
+              "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
+              "maxTimeoutSeconds": 60,
+              "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+              "extra": {
+                "name": "USDC",
+                "version": "2"
+              }
+            },
+            {
+              "scheme": "exact",
+              "network": "solana",
+              "maxAmountRequired": "1000",
+              "amount": "1000",
+              "resource": "http://localhost:4021/example",
+              "description": "Example paid resource",
+              "mimeType": "application/json",
+              "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
+              "maxTimeoutSeconds": 60,
+              "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "extra": {
+                "feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4",
+                "name": "USDC",
+                "decimals": 6
+              }
+            }
+          ]
+        }
+      },
+      "PaymentRequirement": {
+        "type": "object",
+        "description": "One accepted payment rail.",
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "example": "exact"
+          },
+          "network": {
+            "type": "string",
+            "enum": [
+              "base-sepolia",
+              "base",
+              "solana",
+              "solana-devnet"
+            ]
+          },
+          "maxAmountRequired": {
+            "type": "string",
+            "description": "Atomic units (USDC has 6 decimals)."
+          },
+          "amount": {
+            "type": "string",
+            "description": "Alias of maxAmountRequired, read by browser checkout clients."
+          },
+          "resource": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "payTo": {
+            "type": "string",
+            "description": "0x address on EVM rails, base58 address on Solana."
+          },
+          "maxTimeoutSeconds": {
+            "type": "integer"
+          },
+          "asset": {
+            "type": "string",
+            "description": "USDC contract address (EVM) or mint (Solana)."
+          },
+          "extra": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "scheme",
+          "network",
+          "maxAmountRequired",
+          "resource",
+          "payTo",
+          "asset"
+        ]
+      }
+    }
+  }
+}

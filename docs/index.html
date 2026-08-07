@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>x402-agent-sandbox — a fake town for testing agent purchases</title>
+<meta name="description" content="A fake town on testnet — mock restaurant, hotel, and store implementing the x402 suite's exact contracts, so agent purchase code can be tested end to end for fractions of a cent.">
+<style>
+  :root {
+    --accent: #0052ff;
+    --bg: #ffffff; --fg: #0b0e14; --muted: #5a6270; --card: #f5f7fa; --border: #e3e7ee;
+    --code-bg: #0b0e14; --code-fg: #e6e9f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b0e14; --fg: #e6e9f0; --muted: #98a1b3; --card: #141a26; --border: #232b3b;
+            --code-bg: #05070c; --code-fg: #dfe4ee; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--fg); line-height: 1.6; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+  header { padding: 72px 0 40px; text-align: center; }
+  .badge { display: inline-block; font-size: 13px; font-weight: 600; color: var(--accent);
+           border: 1px solid var(--accent); border-radius: 999px; padding: 2px 12px; margin-bottom: 18px; }
+  h1 { font-size: clamp(30px, 6vw, 44px); margin: 0 0 12px; letter-spacing: -0.02em; }
+  .tag { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0 auto 26px; }
+  .install { display: inline-block; background: var(--code-bg); color: var(--code-fg); border-radius: 10px;
+             padding: 12px 20px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px;
+             max-width: 100%; overflow-x: auto; }
+  .btns { margin-top: 22px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { text-decoration: none; font-weight: 600; padding: 10px 20px; border-radius: 10px; font-size: 15px; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.ghost { border: 1px solid var(--border); color: var(--fg); }
+  section { padding: 34px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 24px; margin: 0 0 18px; letter-spacing: -0.01em; }
+  .tablewrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td code, li code, p code { background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+             padding: 1px 6px; font-size: 13px; font-family: ui-monospace, Menlo, Consolas, monospace;
+             overflow-wrap: anywhere; }
+  .price { color: var(--accent); font-weight: 700; white-space: nowrap; }
+  pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 18px;
+        overflow-x: auto; font-size: 13.5px; font-family: ui-monospace, Menlo, Consolas, monospace; line-height: 1.55; }
+  .flow { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+  .step { flex: 1 1 180px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .step .n { color: var(--accent); font-weight: 800; font-size: 13px; letter-spacing: 0.08em; }
+  .step h3 { margin: 6px 0 6px; font-size: 16px; }
+  .step p { margin: 0; color: var(--muted); font-size: 14px; }
+  .links a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  footer { padding: 40px 0 60px; color: var(--muted); font-size: 14px; text-align: center; border-top: 1px solid var(--border); }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">x402 · USDC on Base <em style="font-style:normal;opacity:.6">+</em> Solana</span>
+    <h1>x402-agent-sandbox</h1>
+    <p class="tag">Three sandbox merchants that speak the suite's exact response contracts. Rehearse the whole book-and-buy flow for $0.003 a run, then point the same code at the real thing.</p>
+    <span class="install">git clone https://github.com/nirholas/x402-agent-sandbox &amp;&amp; npm install &amp;&amp; npm run dev</span>
+    <div class="btns">
+      <a class="btn primary" href="https://github.com/nirholas/x402-agent-sandbox">GitHub</a>
+      <a class="btn ghost" href="https://github.com/nirholas/x402-agent-sandbox#run-the-demo">Live demo</a>
+      <a class="btn ghost" href="tutorial.md">Tutorial</a>
+      <a class="btn ghost" href="api.md">API reference</a>
+      <a class="btn ghost" href="agents.md">For AI agents</a>
+    </div>
+  </header>
+
+  <section>
+    <h2>Pricing</h2>
+    <div class="tablewrap"><table>
+      <tr><th>Route</th><th>Price</th><th>What you get back</th></tr>
+      <tr><td><code>GET /town</code></td><td class="price">free</td><td>Directory of the three merchants, their routes, prices, and what each one mirrors. Start here.</td></tr>
+      <tr><td><code>POST /restaurant/book</code></td><td class="price">$0.001</td><td>Signed reservation confirmation in the <a href="https://github.com/nirholas/x402-tablebook">x402-tablebook</a> schema — table, refund terms, cancel token, base64 ICS invite.</td></tr>
+      <tr><td><code>POST /hotel/book</code></td><td class="price">$0.001</td><td>Signed lodging confirmation — room, nightly + total price, refund terms, cancel token, base64 ICS invite.</td></tr>
+      <tr><td><code>POST /store/buy</code></td><td class="price">$0.001</td><td>Signed artifact in the <a href="https://github.com/nirholas/x402-storefront">x402-storefront</a> envelope — digital download URL + license, or order confirmation + fulfillment record.</td></tr>
+      <tr><td><code>reads &amp; cancels</code></td><td class="price">free</td><td><code>/restaurant/availability</code>, <code>/hotel/search</code>, <code>/store/catalog</code>, both cancel routes, <code>/store/download/:token</code>, <code>/verify</code>.</td></tr>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>How x402 works here</h2>
+    <div class="flow">
+      <div class="step"><span class="n">1 · 402</span><h3>Request</h3><p>Call a paid route. The server answers <code>402 Payment Required</code> with an <code>accepts</code> array holding both rails.</p></div>
+      <div class="step"><span class="n">2 · Sign</span><h3>Pay</h3><p>The 402 offers <strong>two rails</strong> — USDC on Base and USDC on Solana. Your client signs whichever one its wallet supports and retries with <code>X-PAYMENT</code>.</p></div>
+      <div class="step"><span class="n">3 · Settle</span><h3>Verify</h3><p>That rail's facilitator verifies and settles on-chain. The server holds no key and pays no gas.</p></div>
+      <div class="step"><span class="n">4 · 200</span><h3>Artifact</h3><p>The signed confirmation arrives in the response body — the same shape the real merchant returns — with the receipt in <code>X-PAYMENT-RESPONSE</code>.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Quickstart</h2>
+    <pre>npm install &amp;&amp; npm run dev                    # the town on :4021, both rails live
+open http://localhost:4021/                   # human checkout demo
+
+# agent side — the whole flow, three paid calls, $0.003 total
+PRIVATE_KEY=0xAgentWallet npx tsx examples/agent-client.ts</pre>
+  </section>
+
+  <section>
+    <h2>Payment rails</h2>
+    <div class="tablewrap"><table>
+      <tr><th>Rail</th><th>Network</th><th>Asset</th><th>Pays to</th><th>Facilitator</th></tr>
+      <tr><td>EVM</td><td><code>base-sepolia</code> (default) · <code>base</code></td><td>USDC</td><td><code>0x40252CFDF8B20Ed757D61ff157719F33Ec332402</code></td><td><code>x402.org/facilitator</code></td></tr>
+      <tr><td>Solana</td><td><code>solana</code> (default) · <code>solana-devnet</code></td><td>USDC</td><td><code>WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW</code></td><td><code>facilitator.payai.network</code></td></tr>
+    </table></div>
+    <p>Both entries appear in every 402. <strong>Pay in USDC on Base or Solana — your client picks the rail.</strong> Set <code>PAY_TO_ADDRESS</code> / <code>SOLANA_PAY_TO_ADDRESS</code> to receive the funds yourself.</p>
+  </section>
+  <section>
+    <h2>What each merchant mirrors</h2>
+    <div class="tablewrap"><table>
+      <tr><th>Sandbox merchant</th><th>Routes</th><th>Mirrors</th></tr>
+      <tr><td>Chez Sandbox</td><td><code>/restaurant/availability</code> · <code>/restaurant/book</code> · <code>/restaurant/cancel/:id</code></td><td><a href="https://github.com/nirholas/x402-tablebook">x402-tablebook</a></td></tr>
+      <tr><td>The Sandbox Inn</td><td><code>/hotel/search</code> · <code>/hotel/book</code> · <code>/hotel/cancel/:id</code></td><td><a href="https://github.com/nirholas/x402-hotel-search">x402-hotel-search</a> offers + the suite lodging confirmation</td></tr>
+      <tr><td>Sandbox Supply Co.</td><td><code>/store/catalog</code> · <code>/store/buy</code> · <code>/store/download/:token</code></td><td><a href="https://github.com/nirholas/x402-storefront">x402-storefront</a></td></tr>
+    </table></div>
+    <p>Field for field, not just in spirit. Client code written against this sandbox ports 1:1 to the real services — change the base URL and the route prefix, nothing else.</p>
+  </section>
+
+  <section>
+    <h2>Deterministic by design</h2>
+    <p>Confirmations are seeded by the request body. The same booking request always returns the same <code>reservationId</code>, the same <code>cancelToken</code>, and the same table or room assignment — only timestamps move. Assert on those fields in a test suite and they stay green; replay a failing conversation and it fails identically.</p>
+  </section>
+
+
+  <section class="links">
+    <h2>Discovery</h2>
+    <p>Agents find this service via <a href="https://github.com/nirholas/x402-agent-sandbox/blob/main/skill.md">skill.md</a> and the machine-readable <a href="https://github.com/nirholas/x402-agent-sandbox/blob/main/public/.well-known/x402">/.well-known/x402</a> manifest — indexable by x402scan.com, the x402 Bazaar, and agentic.market. Questions: <a href="mailto:nichxbt@gmail.com">nichxbt@gmail.com</a>.</p>
+  </section>
+
+  <footer>
+    Part of the <a href="https://github.com/nirholas/x402-suite">x402 Suite</a> · Apache-2.0 · Built on <a href="https://x402.org">x402</a>
+  </footer>
+</div>
+</body>
+</html>

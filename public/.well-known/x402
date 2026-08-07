@@ -1,0 +1,192 @@
+{
+  "x402Version": 1,
+  "name": "x402-agent-sandbox",
+  "description": "A fake town on testnet — mock restaurant, hotel, and store implementing the x402 suite's exact contracts, for end-to-end agent purchase testing",
+  "paymentRails": "Pay in USDC on Base or Solana — your client picks the rail.",
+  "contact": "nichxbt@gmail.com",
+  "accepts": [
+    { "network": "base-sepolia", "asset": "USDC", "assetAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e", "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402" },
+    { "network": "base", "asset": "USDC", "assetAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402" },
+    { "network": "solana", "asset": "USDC", "assetAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW" }
+  ],
+  "resources": [
+    {
+      "resource": "POST /restaurant/book",
+      "description": "Sandbox restaurant booking. Returns the x402-tablebook confirmation schema field for field, deterministically seeded by the request body, HMAC-signed, with a base64 ICS invite.",
+      "price": "$0.001",
+      "networks": ["base-sepolia", "base", "solana"],
+      "asset": "USDC",
+      "mirrors": "https://github.com/nirholas/x402-tablebook",
+      "accepts": [
+        { "network": "base-sepolia", "asset": "USDC", "assetAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e", "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402" },
+        { "network": "base", "asset": "USDC", "assetAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402" },
+        { "network": "solana", "asset": "USDC", "assetAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW" }
+      ],
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "reservationId": { "type": "string" },
+          "status": { "type": "string", "const": "confirmed" },
+          "restaurant": { "type": "string" },
+          "confirmedTime": { "type": "string" },
+          "party": { "type": "integer" },
+          "name": { "type": "string" },
+          "table": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "seats": { "type": "integer" }
+            }
+          },
+          "refundTerms": {
+            "type": "object",
+            "properties": {
+              "holdPrice": { "type": "string" },
+              "freeCancellationHours": { "type": "integer" },
+              "description": { "type": "string" }
+            }
+          },
+          "cancelToken": { "type": "string" },
+          "cancelEndpoint": { "type": "string" },
+          "ledgerEntry": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "enum": ["hold", "refund", "forfeit"] },
+              "amount": { "type": "string" },
+              "reason": { "type": "string" },
+              "at": { "type": "string", "format": "date-time" }
+            }
+          },
+          "ics": { "type": "string", "description": "base64 RFC 5545 calendar invite" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "sandbox": { "type": "object" },
+          "signature": { "type": "string", "description": "hex HMAC-SHA256 over the canonical confirmation" }
+        },
+        "required": ["reservationId", "status", "confirmedTime", "party", "table", "refundTerms", "cancelToken", "ics", "signature"]
+      }
+    },
+    {
+      "resource": "POST /hotel/book",
+      "description": "Sandbox hotel booking. Returns the suite lodging confirmation schema — the tablebook confirmation's sibling — deterministically seeded, HMAC-signed, with a base64 ICS invite.",
+      "price": "$0.001",
+      "networks": ["base-sepolia", "base", "solana"],
+      "asset": "USDC",
+      "mirrors": "https://github.com/nirholas/x402-hotel-search",
+      "accepts": [
+        { "network": "base-sepolia", "asset": "USDC", "assetAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e", "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402" },
+        { "network": "base", "asset": "USDC", "assetAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402" },
+        { "network": "solana", "asset": "USDC", "assetAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW" }
+      ],
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "bookingId": { "type": "string" },
+          "status": { "type": "string", "const": "confirmed" },
+          "hotel": { "type": "string" },
+          "hotelId": { "type": "string" },
+          "stay": {
+            "type": "object",
+            "properties": {
+              "checkIn": { "type": "string", "format": "date" },
+              "checkOut": { "type": "string", "format": "date" },
+              "nights": { "type": "integer" },
+              "checkInTime": { "type": "string" },
+              "checkOutTime": { "type": "string" }
+            }
+          },
+          "guests": { "type": "integer" },
+          "name": { "type": "string" },
+          "room": {
+            "type": "object",
+            "properties": {
+              "roomType": { "type": "string" },
+              "description": { "type": "string" },
+              "beds": { "type": "integer" },
+              "maxOccupancy": { "type": "integer" }
+            }
+          },
+          "price": {
+            "type": "object",
+            "properties": {
+              "nightly": { "type": "string" },
+              "total": { "type": "string" },
+              "currency": { "type": "string" },
+              "nights": { "type": "integer" }
+            }
+          },
+          "refundTerms": { "type": "object" },
+          "cancelToken": { "type": "string" },
+          "cancelEndpoint": { "type": "string" },
+          "ledgerEntry": { "type": "object" },
+          "ics": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "sandbox": { "type": "object" },
+          "signature": { "type": "string" }
+        },
+        "required": ["bookingId", "status", "stay", "room", "price", "cancelToken", "ics", "signature"]
+      }
+    },
+    {
+      "resource": "POST /store/buy",
+      "description": "Sandbox store purchase. Returns the x402-storefront signed-artifact envelope: digital goods come back as a signed time-limited download URL + license, physical goods as a signed order confirmation + fulfillment record.",
+      "price": "$0.001",
+      "networks": ["base-sepolia", "base", "solana"],
+      "asset": "USDC",
+      "mirrors": "https://github.com/nirholas/x402-storefront",
+      "accepts": [
+        { "network": "base-sepolia", "asset": "USDC", "assetAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e", "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402" },
+        { "network": "base", "asset": "USDC", "assetAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402" },
+        { "network": "solana", "asset": "USDC", "assetAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW" }
+      ],
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "type": "object",
+            "properties": {
+              "orderId": { "type": "string" },
+              "sku": { "type": "string" },
+              "kind": { "type": "string", "enum": ["digital", "physical"] },
+              "downloadUrl": { "type": "string", "description": "digital only — redeem free at GET /store/download/:token" },
+              "downloadExpiresAt": { "type": "string", "format": "date-time" },
+              "contentType": { "type": "string" },
+              "contentSha256": { "type": "string" },
+              "license": { "type": "string" },
+              "fulfillment": {
+                "type": "object",
+                "description": "physical only",
+                "properties": {
+                  "status": { "type": "string" },
+                  "promise": { "type": "string" },
+                  "shipTo": { "type": "object" },
+                  "weightGrams": { "type": "integer" }
+                }
+              },
+              "supportEmail": { "type": "string" },
+              "purchasedAt": { "type": "string", "format": "date-time" },
+              "sandbox": { "type": "object" }
+            },
+            "required": ["orderId", "sku", "kind", "purchasedAt"]
+          },
+          "signature": { "type": "string" },
+          "algorithm": { "type": "string", "const": "HMAC-SHA256" },
+          "canonicalization": { "type": "string", "const": "sorted-keys-json" }
+        },
+        "required": ["payload", "signature", "algorithm", "canonicalization"]
+      }
+    }
+  ],
+  "freeResources": [
+    { "resource": "GET /town", "description": "Directory of the sandbox merchants, their routes, and what each mirrors." },
+    { "resource": "GET /restaurant/availability", "description": "Open slots (x402-tablebook /availability schema). Free here, $0.001 at the real merchant." },
+    { "resource": "GET /hotel/search", "description": "Room offers (x402-hotel-search /search schema). Free here, $0.005 at the real merchant." },
+    { "resource": "GET /store/catalog", "description": "Items with prices and buy routes (x402-storefront /catalog schema)." },
+    { "resource": "POST /restaurant/cancel/:id", "description": "Cancellation record + refund ledger entry, auth by cancelToken." },
+    { "resource": "POST /hotel/cancel/:id", "description": "Cancellation record + refund ledger entry, auth by cancelToken." },
+    { "resource": "GET /store/download/:token", "description": "Redeems a digital purchase's signed download token." },
+    { "resource": "POST /verify", "description": "Verify any signed artifact this sandbox produced." },
+    { "resource": "GET /health", "description": "Liveness." }
+  ]
+}
