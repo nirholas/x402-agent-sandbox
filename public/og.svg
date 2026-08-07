@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="x402-agent-sandbox">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e14"/>
+      <stop offset="100%" stop-color="#131c33"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="72" y="86" width="96" height="96" rx="22" fill="#0052ff"/>
+  <text x="120" y="150" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="38"
+        font-weight="700" fill="#ffffff" text-anchor="middle">402</text>
+  <text x="72" y="300" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+        font-size="66" font-weight="700" fill="#e6e9f0">x402-agent-sandbox</text>
+  <text x="72" y="368" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+        font-size="30" fill="#98a1b3">A fake town on testnet — mock restaurant, hotel, and store implementing the su</text>
+  <text x="72" y="536" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-size="26" fill="#0a84ff">HTTP 402 &#183; USDC on Base + Solana &#183; 3 paid routes</text>
+</svg>

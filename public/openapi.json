@@ -36,7 +36,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/restaurant/availability": {
@@ -92,7 +93,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/restaurant/book": {
@@ -190,6 +192,7 @@
                     },
                     "refundTerms": {
                       "type": "object",
+                      "description": "Same refund-terms shape the real merchant returns.",
                       "properties": {
                         "holdPrice": {
                           "type": "string"
@@ -200,7 +203,12 @@
                         "description": {
                           "type": "string"
                         }
-                      }
+                      },
+                      "required": [
+                        "holdPrice",
+                        "freeCancellationHours",
+                        "description"
+                      ]
                     },
                     "cancelToken": {
                       "type": "string"
@@ -210,6 +218,7 @@
                     },
                     "ledgerEntry": {
                       "type": "object",
+                      "description": "Refund-ledger entry for the hold paid via x402.",
                       "properties": {
                         "kind": {
                           "type": "string",
@@ -229,7 +238,13 @@
                           "type": "string",
                           "format": "date-time"
                         }
-                      }
+                      },
+                      "required": [
+                        "kind",
+                        "amount",
+                        "reason",
+                        "at"
+                      ]
                     },
                     "ics": {
                       "type": "string",
@@ -240,7 +255,25 @@
                       "format": "date-time"
                     },
                     "sandbox": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Sandbox marker — present on every sandbox artifact, absent at the real merchants.",
+                      "properties": {
+                        "environment": {
+                          "type": "string",
+                          "const": "sandbox"
+                        },
+                        "merchant": {
+                          "type": "string"
+                        },
+                        "note": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "environment",
+                        "merchant",
+                        "note"
+                      ]
                     },
                     "signature": {
                       "type": "string",
@@ -383,7 +416,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/hotel/search": {
@@ -438,7 +472,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/hotel/book": {
@@ -579,7 +614,24 @@
                       }
                     },
                     "refundTerms": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Same refund-terms shape the real merchant returns.",
+                      "properties": {
+                        "holdPrice": {
+                          "type": "string"
+                        },
+                        "freeCancellationHours": {
+                          "type": "integer"
+                        },
+                        "description": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "holdPrice",
+                        "freeCancellationHours",
+                        "description"
+                      ]
                     },
                     "cancelToken": {
                       "type": "string"
@@ -588,7 +640,34 @@
                       "type": "string"
                     },
                     "ledgerEntry": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Refund-ledger entry for the hold paid via x402.",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "hold",
+                            "refund",
+                            "forfeit"
+                          ]
+                        },
+                        "amount": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "amount",
+                        "reason",
+                        "at"
+                      ]
                     },
                     "ics": {
                       "type": "string"
@@ -598,7 +677,25 @@
                       "format": "date-time"
                     },
                     "sandbox": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Sandbox marker — present on every sandbox artifact, absent at the real merchants.",
+                      "properties": {
+                        "environment": {
+                          "type": "string",
+                          "const": "sandbox"
+                        },
+                        "merchant": {
+                          "type": "string"
+                        },
+                        "note": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "environment",
+                        "merchant",
+                        "note"
+                      ]
                     },
                     "signature": {
                       "type": "string"
@@ -740,7 +837,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/store/catalog": {
@@ -758,7 +856,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/store/buy": {
@@ -873,7 +972,25 @@
                           "format": "date-time"
                         },
                         "sandbox": {
-                          "type": "object"
+                          "type": "object",
+                          "description": "Sandbox marker — present on every sandbox artifact, absent at the real merchants.",
+                          "properties": {
+                            "environment": {
+                              "type": "string",
+                              "const": "sandbox"
+                            },
+                            "merchant": {
+                              "type": "string"
+                            },
+                            "note": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "environment",
+                            "merchant",
+                            "note"
+                          ]
                         }
                       },
                       "required": [
@@ -995,7 +1112,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/verify": {
@@ -1053,7 +1171,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/health": {
@@ -1085,7 +1204,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/.well-known/x402": {
@@ -1103,7 +1223,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     }
   },

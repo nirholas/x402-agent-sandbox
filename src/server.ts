@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { join } from "node:path";
 import { paywall, railSummary, type RoutePrices } from "./payments.js";
+import { ROUTE_SCHEMAS } from "./schemas.js";
 import {
   SandboxError,
   hotelBook,
@@ -26,14 +27,17 @@ const PRICES: RoutePrices = {
   "POST /restaurant/book": {
     price: "$0.001",
     description: "Sandbox restaurant booking — returns the x402-tablebook confirmation schema",
+    ...ROUTE_SCHEMAS["POST /restaurant/book"],
   },
   "POST /hotel/book": {
     price: "$0.001",
     description: "Sandbox hotel booking — returns the suite lodging confirmation schema",
+    ...ROUTE_SCHEMAS["POST /hotel/book"],
   },
   "POST /store/buy": {
     price: "$0.001",
     description: "Sandbox store purchase — returns the x402-storefront signed artifact schema",
+    ...ROUTE_SCHEMAS["POST /store/buy"],
   },
 };
 

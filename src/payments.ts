@@ -24,6 +24,7 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 import { findMatchingPaymentRequirements, processPriceToAtomicAmount, safeBase64Decode, safeBase64Encode } from "x402/shared";
 import { PaymentPayloadSchema, type Network, type PaymentRequirements } from "x402/types";
 import { useFacilitator } from "x402/verify";
+import type { RouteSchema } from "./schemas.js";
 
 /** Suite default receive addresses. Public, safe to commit — override to get paid yourself. */
 export const DEFAULT_EVM_PAY_TO = "0x40252CFDF8B20Ed757D61ff157719F33Ec332402";
@@ -56,7 +57,15 @@ const svmFacilitator = useFacilitator({ url: SOLANA_FACILITATOR });
 const EVM_ENABLED = /^0x[0-9a-fA-F]{40}$/.test(EVM_PAY_TO);
 const SOLANA_ENABLED = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(SOLANA_PAY_TO);
 
-export type RoutePrices = Record<string, { price: string; description: string }>;
+/**
+ * One paid route: what it costs, what it is, and — for discovery — how to call it.
+ * `outputSchema` is copied verbatim into every accept entry of the 402 so agents
+ * (and x402scan) can read the invocation contract straight off the challenge;
+ * supply it from `ROUTE_SCHEMAS` in `./schemas.js`.
+ */
+export type RouteSpec = { price: string; description: string; outputSchema?: RouteSchema };
+
+export type RoutePrices = Record<string, RouteSpec>;
 
 /** Human-readable summary for the startup banner. */
 export function railSummary(): string[] {
@@ -78,7 +87,12 @@ export function railSummary(): string[] {
 }
 
 /** Build the `accepts` array advertised in a 402 for one resource. */
-export function buildAccepts(resource: string, price: string, description: string): PaymentRequirements[] {
+export function buildAccepts(
+  resource: string,
+  price: string,
+  description: string,
+  outputSchema?: RouteSchema,
+): PaymentRequirements[] {
   const accepts: PaymentRequirements[] = [];
 
   if (EVM_ENABLED) {
@@ -96,6 +110,7 @@ export function buildAccepts(resource: string, price: string, description: strin
         payTo: EVM_PAY_TO,
         maxTimeoutSeconds: 60,
         asset: evm.asset.address,
+        outputSchema,
         extra: "eip712" in evm.asset ? evm.asset.eip712 : undefined,
       });
     }
@@ -116,6 +131,7 @@ export function buildAccepts(resource: string, price: string, description: strin
         payTo: SOLANA_PAY_TO,
         maxTimeoutSeconds: 60,
         asset: svm.asset.address,
+        outputSchema,
         // `amount` + `extra.feePayer` are what the browser checkout modal reads;
         // `maxAmountRequired` is what x402 SDK clients read. Carrying both keeps
         // one entry usable by every client without a second, near-duplicate accept.
@@ -134,7 +150,7 @@ function resourceUrl(req: Request): string {
   return `${proto}://${req.get("host")}${req.baseUrl}${req.path}`;
 }
 
-function matchRoute(prices: RoutePrices, req: Request): { price: string; description: string } | undefined {
+function matchRoute(prices: RoutePrices, req: Request): RouteSpec | undefined {
   const path = req.baseUrl + req.path;
   for (const [pattern, cfg] of Object.entries(prices)) {
     const [verb, rawPath] = pattern.split(/\s+/);
@@ -162,7 +178,7 @@ export function paywall(prices: RoutePrices): RequestHandler {
     }
 
     const resource = resourceUrl(req);
-    const accepts = buildAccepts(resource, route.price, route.description);
+    const accepts = buildAccepts(resource, route.price, route.description, route.outputSchema);
 
     const challenge = (error: string) => ({
       x402Version: 1,

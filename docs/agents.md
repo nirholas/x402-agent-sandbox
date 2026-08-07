@@ -58,6 +58,20 @@ The flow is identical on both rails: request → `402` + requirements → client
 payment → retry with `X-PAYMENT` → `201` with the artifact in the body and the receipt
 (`{rail, network, transaction, payer}`) in `X-PAYMENT-RESPONSE`.
 
+## Protocol version
+
+This service speaks **x402 v1**. The challenge body is
+`{ x402Version: 1, error, resource, accepts[] }`, and every `accepts[]` entry carries the
+route's invocation contract in `outputSchema` — `input` (HTTP method, path/query params, JSON
+body fields) and `output` (JSON Schema of the success body) — so a client can build a correct
+call and validate the response straight from the 402 it just received, without fetching the
+OpenAPI document first.
+
+x402 **v2** moves those schemas to `extensions.bazaar.schema` and switches to CAIP-2 network
+ids. It is a planned future upgrade for [agentcash](https://agentcash.com) compatibility;
+switching today would break the `x402-fetch` clients shipped in `examples/`, so v1 remains the
+wire format until the ecosystem's clients speak both.
+
 ## What you get back
 
 - `POST /restaurant/book` ($0.001) → **the reservation confirmation**, in
