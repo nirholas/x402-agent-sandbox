@@ -19,7 +19,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { selectPaymentRequirements } from "x402/client";
 import { wrapFetchWithPayment } from "x402-fetch";
 
-const BASE_URL = process.env.SANDBOX_URL || "http://localhost:4021";
+const BASE_URL = process.env.SANDBOX_URL || "http://localhost:4038";
 const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
 
 // The sandbox's 402 offers both rails; pin the EVM one for a viem wallet.
@@ -107,7 +107,7 @@ await server.connect(new StdioServerTransport());
       "command": "npx",
       "args": ["tsx", "/absolute/path/to/mcp-sandbox.ts"],
       "env": {
-        "SANDBOX_URL": "http://localhost:4021",
+        "SANDBOX_URL": "http://localhost:4038",
         "PRIVATE_KEY": "0x…funded Base Sepolia wallet…"
       }
     }

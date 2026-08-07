@@ -6,7 +6,7 @@ x402 suite's **exact** response contracts, so agent code you write against this 
 HMAC-signed confirmation in the same response. Reads are free here, so exploring the town
 costs nothing. Nothing is really reserved, shipped, or charged beyond the micropayment.
 
-**Base URL**: `{BASE_URL}` (self-hosted — e.g. `http://localhost:4021`)
+**Base URL**: `{BASE_URL}` (self-hosted — e.g. `http://localhost:4038`)
 
 **Start here**: `GET /town` — the merchant directory, with every route, price, and what it mirrors.
 

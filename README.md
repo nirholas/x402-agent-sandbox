@@ -27,7 +27,7 @@ CI. You test the payment path, not a stub of it.
 ```bash
 git clone https://github.com/nirholas/x402-agent-sandbox
 cd x402-agent-sandbox && npm install
-npm run dev                                          # the town on :4021, both rails live
+npm run dev                                          # the town on :4038, both rails live
 
 # agent side — the whole tour, three paid calls, $0.003 total
 # (Base Sepolia USDC faucet: https://faucet.circle.com)
@@ -36,7 +36,7 @@ PRIVATE_KEY=0xAgentWallet npm run client
 
 ### Run the demo
 
-Open **http://localhost:4021/** for the human checkout page: three merchant cards, each wired to
+Open **http://localhost:4038/** for the human checkout page: three merchant cards, each wired to
 the drop-in payment modal. Connect Phantom to pay on Solana or an EVM wallet to pay on Base —
 the same 402 serves both — and the signed confirmation renders straight from the 200 body.
 

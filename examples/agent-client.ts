@@ -2,7 +2,7 @@
  * The whole town, end to end: discover → book a table → book a room → buy a
  * thing → download it → cancel → verify a signature.
  *
- *   PRIVATE_KEY=0x... BASE_URL=http://localhost:4021 npx tsx examples/agent-client.ts
+ *   PRIVATE_KEY=0x... BASE_URL=http://localhost:4038 npx tsx examples/agent-client.ts
  *
  * The wallet needs testnet USDC on Base Sepolia — faucet: https://faucet.circle.com
  * Three paid calls at $0.001 each. The whole run costs $0.003.
@@ -15,7 +15,7 @@ import { selectPaymentRequirements } from "x402/client";
 import type { PaymentRequirements } from "x402/types";
 import { wrapFetchWithPayment } from "x402-fetch";
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:4021";
+const BASE_URL = process.env.BASE_URL || "http://localhost:4038";
 const pk = process.env.PRIVATE_KEY;
 if (!pk) {
   console.error("Set PRIVATE_KEY to a funded Base Sepolia wallet (testnet USDC: https://faucet.circle.com)");
@@ -156,6 +156,6 @@ main().catch((e) => {
  *   // then retry the same request with { headers: { "X-PAYMENT": xPayment } }
  *
  * Raw dual-rail 402 body, for reference:
- *   curl -s -X POST http://localhost:4021/store/buy -H 'content-type: application/json' \
+ *   curl -s -X POST http://localhost:4038/store/buy -H 'content-type: application/json' \
  *     -d '{"sku":"sandbox-guide"}' | jq '.accepts[] | {network, payTo, asset, maxAmountRequired}'
  * ───────────────────────────────────────────────────────────────────────────── */

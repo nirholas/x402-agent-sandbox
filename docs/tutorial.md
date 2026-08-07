@@ -39,7 +39,7 @@ npm run dev
 ```
 
 ```
-x402-agent-sandbox — the fake town — listening on :4021
+x402-agent-sandbox — the fake town — listening on :4038
   rail evm     base-sepolia   USDC → 0x40252CFDF8B20Ed757D61ff157719F33Ec332402  (facilitator https://x402.org/facilitator)
   rail solana  solana-devnet  USDC → WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW  (facilitator https://facilitator.payai.network)
   paid routes:
@@ -51,10 +51,10 @@ x402-agent-sandbox — the fake town — listening on :4021
 ## 4. Look around — for free
 
 ```bash
-curl -s http://localhost:4021/town | jq '.merchants[] | {name, mirrors}'
-curl -s "http://localhost:4021/restaurant/availability?date=2026-09-01&party=2" | jq '.slots[0]'
-curl -s "http://localhost:4021/hotel/search?checkIn=2026-09-01&checkOut=2026-09-03" | jq '.offers[0]'
-curl -s http://localhost:4021/store/catalog | jq '.items[].sku'
+curl -s http://localhost:4038/town | jq '.merchants[] | {name, mirrors}'
+curl -s "http://localhost:4038/restaurant/availability?date=2026-09-01&party=2" | jq '.slots[0]'
+curl -s "http://localhost:4038/hotel/search?checkIn=2026-09-01&checkOut=2026-09-03" | jq '.offers[0]'
+curl -s http://localhost:4038/store/catalog | jq '.items[].sku'
 ```
 
 Reads are free here. They cost money at the real merchants — `/availability` is $0.001 at
@@ -64,7 +64,7 @@ when you point your agent at production.
 ## 5. Your first 402
 
 ```bash
-curl -i -X POST http://localhost:4021/restaurant/book \
+curl -i -X POST http://localhost:4038/restaurant/book \
   -H 'Content-Type: application/json' \
   -d '{"date":"2026-09-01","time":"19:00","party":2,"name":"Ada Lovelace"}'
 ```
@@ -80,7 +80,7 @@ Fund a throwaway wallet with Base Sepolia USDC (https://faucet.circle.com), then
 tour:
 
 ```bash
-PRIVATE_KEY=0xAgentWallet BASE_URL=http://localhost:4021 npm run client
+PRIVATE_KEY=0xAgentWallet BASE_URL=http://localhost:4038 npm run client
 ```
 
 `examples/agent-client.ts` discovers the town, books a table, books a room, buys a digital item,
@@ -88,7 +88,7 @@ redeems the download, cancels the table, and verifies a signature — three paid
 It uses `x402-fetch` with the selector pinned to the EVM entry, since a viem wallet cannot sign
 the Solana one.
 
-Prefer to click? Open **http://localhost:4021/** and use the drop-in payment modal. Connect
+Prefer to click? Open **http://localhost:4038/** and use the drop-in payment modal. Connect
 Phantom to pay on Solana or an EVM wallet to pay on Base — the same 402 serves both.
 
 ## 7. Read the artifact
@@ -134,7 +134,7 @@ replays identically, and nobody has to snapshot a random id.
 ## 9. Cancel and verify
 
 ```bash
-curl -s -X POST http://localhost:4021/restaurant/cancel/res_1a2b3c4d5e6f \
+curl -s -X POST http://localhost:4038/restaurant/cancel/res_1a2b3c4d5e6f \
   -H 'Content-Type: application/json' \
   -d '{"cancelToken":"…","confirmedTime":"2026-09-01T19:00"}' | jq '.refundLedgerEntry'
 ```
@@ -146,7 +146,7 @@ treated as refundable, which is the friendlier default for a test target.
 Any signed artifact can be checked without the secret:
 
 ```bash
-curl -s -X POST http://localhost:4021/verify \
+curl -s -X POST http://localhost:4038/verify \
   -H 'Content-Type: application/json' \
   -d '{"payload":{…},"signature":"…"}' | jq
 ```

@@ -1,6 +1,6 @@
 # API reference
 
-Base URL: your deployment (default `http://localhost:4021`). Paid routes speak x402: an unpaid
+Base URL: your deployment (default `http://localhost:4038`). Paid routes speak x402: an unpaid
 request returns `402` with `PaymentRequirements` listing **both** payment rails (USDC on Base
 and USDC on Solana); pay either and retry with `X-PAYMENT`.
 Full machine-readable spec: [`openapi.json`](https://github.com/nirholas/x402-agent-sandbox/blob/main/openapi.json).
@@ -17,12 +17,12 @@ The directory. Start every session here.
 ```json
 {
   "town": "x402 Agent Sandbox",
-  "baseUrl": "http://localhost:4021",
+  "baseUrl": "http://localhost:4038",
   "payment": {
     "protocol": "x402",
     "note": "Pay in USDC on Base or Solana — your client picks the rail.",
     "rails": ["base-sepolia | base", "solana | solana-devnet"],
-    "manifest": "http://localhost:4021/.well-known/x402"
+    "manifest": "http://localhost:4038/.well-known/x402"
   },
   "determinism": "Confirmations are seeded by the request body: the same booking request always returns the same ids, tokens, and assignments.",
   "merchants": [
@@ -332,21 +332,21 @@ Dual-rail: `accepts` always lists **both** USDC on Base and USDC on Solana. Pay 
   "x402Version": 1,
   "error": "Payment required — pay in USDC on Base or Solana; your client picks the rail.",
   "resource": {
-    "url": "http://localhost:4021/restaurant/book",
+    "url": "http://localhost:4038/restaurant/book",
     "description": "Sandbox restaurant booking — returns the x402-tablebook confirmation schema",
     "mimeType": "application/json"
   },
   "accepts": [
     {
       "scheme": "exact", "network": "base-sepolia", "maxAmountRequired": "1000",
-      "resource": "http://localhost:4021/restaurant/book",
+      "resource": "http://localhost:4038/restaurant/book",
       "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
       "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
       "maxTimeoutSeconds": 60, "extra": { "name": "USDC", "version": "2" }
     },
     {
       "scheme": "exact", "network": "solana", "maxAmountRequired": "1000", "amount": "1000",
-      "resource": "http://localhost:4021/restaurant/book",
+      "resource": "http://localhost:4038/restaurant/book",
       "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
       "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
       "maxTimeoutSeconds": 60,

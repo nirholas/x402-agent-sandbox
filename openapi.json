@@ -15,7 +15,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:4021",
+      "url": "http://localhost:4038",
       "description": "local sandbox"
     }
   ],
@@ -1127,7 +1127,7 @@
               "scheme": "exact",
               "network": "base-sepolia",
               "maxAmountRequired": "1000",
-              "resource": "http://localhost:4021/example",
+              "resource": "http://localhost:4038/example",
               "description": "Example paid resource",
               "mimeType": "application/json",
               "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
@@ -1143,7 +1143,7 @@
               "network": "solana",
               "maxAmountRequired": "1000",
               "amount": "1000",
-              "resource": "http://localhost:4021/example",
+              "resource": "http://localhost:4038/example",
               "description": "Example paid resource",
               "mimeType": "application/json",
               "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
