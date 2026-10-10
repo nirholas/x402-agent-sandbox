@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "x402-agent-sandbox"
+abstract: "A fake town on testnet: mock restaurant, hotel, and store implementing the suite's exact contracts, for end-to-end agent purchase testing"
+license: Apache-2.0
+repository-code: "https://github.com/nirholas/x402-agent-sandbox"
+url: "https://three.ws"
+authors:
+  - name: three.ws
+    website: "https://three.ws"
