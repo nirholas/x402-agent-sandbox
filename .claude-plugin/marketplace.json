@@ -1,0 +1,22 @@
+{
+  "name": "x402-agent-sandbox",
+  "owner": {
+    "name": "nirholas"
+  },
+  "description": "Test town of a restaurant, hotel and store that mirror the x402 suite contracts, for end-to-end agent purchase tests.",
+  "plugins": [
+    {
+      "name": "x402-agent-sandbox",
+      "source": "./plugins/x402-agent-sandbox",
+      "description": "Test town of a restaurant, hotel and store that mirror the x402 suite contracts, for end-to-end agent purchase tests.",
+      "category": "development",
+      "tags": [
+        "x402",
+        "testing",
+        "sandbox",
+        "agents",
+        "payments"
+      ]
+    }
+  ]
+}
